@@ -2,8 +2,18 @@
 ## Course: Formal Languages & Finite Automata
 ## Author: Denis Smocvin
 
+## Theory
+Definitions:
+
+- **Language** - a means of communicating information, by using visual or audio interpretations of words.
+- **Formal language** -  a set of strings based on an alphabet that are generated with the help of a grammar.
+- **String** - a combination of symbols generated with the help of rules from the production set.
+- **Grammar** - an entity defined by four elements: the set of non-terminal symbols, the set of terminal symbols, the start symbol, and the set of production rules.
+- **Automation** - an abstract computational device. It contains the states, an alphabet, transition functions for each state, the initial and final states.
+- **Finite automaton** - an automaton with finite amounts of states and transitions.
+
 ## Objectives
----
+
 1. Understand what a language is and what it needs to have in order to be considered a formal one.
 
 2. Provide the initial setup for the evolving project that you will work on during this semester. I said project because usually at lab works, I encourage/impose students to treat all the labs like stages of development of a whole project. Basically you need to do the following:

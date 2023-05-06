@@ -29,6 +29,7 @@ public class CNF
         EliminateEpsilonRules();
         EliminateNonSolitaryTerminals();
         ResolveNonTerminalCoupling();
+        EliminateUnitRules();
         
         SortRules();
     }
@@ -85,14 +86,13 @@ public class CNF
                 productionsToRemove.Add(production);
 
                 productionsToAdd.Add(new KeyValuePair<string, string>(
-                    production.Key, 
-                    production.Value[0] + production.Key + _nameIndex));
+                    production.Key,
+                    GetComposeProductionKey(production.Value) + production.Key + _nameIndex));
+                
+                Console.WriteLine("------- " + GetComposeProductionKey(production.Value) + production.Key + _nameIndex);
             }
         }
 
-        Console.WriteLine(">>>>> " + productionsToRemove.Count);
-        Console.WriteLine(">>>>> " + productionsToAdd.Count);
-        
         foreach (var production in productionsToAdd)
         {
             Rules.Productions.Add(production);
@@ -101,13 +101,14 @@ public class CNF
         foreach (var production in productionsToRemove)
         {
             _nameIndex = 1;
-            //CreateTransitiveRules(production);
-            CreateTransitiveRules(production.Key, production.Value[1..^1]);
+
+            CreateTransitiveRules(production.Key, production.Value);
             Rules.Productions.Remove(production);
         }
-
-        _nameIndex = 1;
     }
+
+    private string GetComposeProductionKey(string key) => Char.IsDigit(key[1]) ? key[0].ToString() + key[1] : key[0].ToString();
+    private string TrimCompositeProductionRule(string s) => Char.IsDigit(s[1]) ? s[2..^0] : s;
 
     private void EliminateNonSolitaryTerminals()
     {
@@ -156,9 +157,6 @@ public class CNF
         }
     }
 
-    // method to go from A -> X1...Xn to A -> X1A1, A1 -> X2..Xn
-    //private KeyValuePair<string, string> CreateTransitiveRule(string key, string s) => new(key + _nameIndex, s[1..^1]);
-
     private void CreateTransitiveRules(string key, string s)
     {
         if (s.Length == 2)
@@ -168,12 +166,62 @@ public class CNF
             return;
         }
         
-        Rules.Productions.Add(new KeyValuePair<string, string>(key + _nameIndex, s[0] + (key + 1)));
+        Rules.Productions.Add(new KeyValuePair<string, string>(key + _nameIndex, GetComposeProductionKey(s) + (key + 1)));
 
         _nameIndex++;
-        CreateTransitiveRules(key, s[1..^1]);
+        
+        CreateTransitiveRules(key, TrimCompositeProductionRule(s)[1..^0]);
     }
 
+    private void EliminateUnitRules()
+    {
+        // temporary lists to deal with the immutability of our dictionary-like list elements
+        List<KeyValuePair<string, string>> productionsToRemove = new();
+        List<KeyValuePair<string, string>> productionsToAdd = new();
+
+        foreach (var production in Rules.Productions)
+        {
+            if (production.Value == "S")
+                continue;
+
+            bool needsRemoval = false;
+            
+            foreach (var prod in Rules.Productions)
+            {
+                if (prod.Equals(production))
+                    continue;
+
+                if (prod.Key == production.Value)
+                {
+                    Console.WriteLine("$$$$$ " + prod.Key);
+                    productionsToAdd.Add(new KeyValuePair<string, string>(
+                        production.Key,
+                        prod.Value
+                        ));
+
+                    needsRemoval = true;
+                }
+            }
+            
+            if (needsRemoval)
+                productionsToRemove.Add(production);
+        }
+
+        // add productions
+        foreach (var production in productionsToAdd)
+        {
+            Console.WriteLine("Add: " + production.Value);
+            Rules.Productions.Add(production);
+        }
+        
+        // remove productions
+        foreach (var production in productionsToRemove)
+        {
+            Console.WriteLine("Remove: " + production.Value);
+            Rules.Productions.Remove(production);
+        }
+    }
+    
     private void SortRules()
     {
         Rules.Productions = Rules.Productions.OrderBy(rule => rule.Key).ToList();
@@ -250,6 +298,8 @@ class ProductionRules
         return count > 2;
     }
 
+    public bool IsNonTerminal(char c) => Vocabulary.NonTerminal.Contains(c.ToString());
+    
     public bool IsTwoNonTerminals(string s) =>
         s.Length == 2 &&
         Vocabulary.NonTerminal.Contains(s[0].ToString()) &&

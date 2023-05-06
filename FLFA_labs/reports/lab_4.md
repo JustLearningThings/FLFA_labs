@@ -124,5 +124,4 @@ production rules by keys to be able to look at them easier.
 In conclusion, Chomsky Normal Form (CNF) is a type of context-free grammar that has been proven to have several useful properties in
 formal language theory and computational linguistics. By converting a context-free grammar to CNF, it is possible to efficiently
 parse strings and to determine whether a given language is context-free. While the conversion process may introduce additional
-non-terminals and productions, it ultimately produces a more structured and easier to manipulate grammar that can be useful in
-a variety of applications.
+non-terminals and productions, it ultimately produces a more structured and easier to manipulate grammar that can be useful in a variety of applications.
